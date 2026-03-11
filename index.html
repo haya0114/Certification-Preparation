@@ -3,526 +3,221 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Java 練習問題クイズ</title>
+<title>CertQuiz</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
-    --bg: #0d1117;
-    --surface: #161b22;
-    --surface2: #1c2128;
-    --border: #30363d;
-    --accent: #f78166;
-    --accent2: #79c0ff;
-    --accent3: #56d364;
-    --text: #e6edf3;
-    --text-muted: #8b949e;
-    --wrong: #f85149;
-    --correct: #3fb950;
+    --bg: #0d1117; --surface: #161b22; --surface2: #1c2128; --border: #30363d;
+    --accent: #f78166; --accent2: #79c0ff; --accent3: #56d364;
+    --text: #e6edf3; --text-muted: #8b949e; --wrong: #f85149; --correct: #3fb950;
   }
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Noto Sans JP', sans-serif;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 24px 16px;
-  }
-
-  .header {
-    text-align: center;
-    margin-bottom: 32px;
-  }
-
-  .header .tag {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 3px;
-    color: var(--accent);
-    text-transform: uppercase;
-    margin-bottom: 8px;
-  }
-
-  .header h1 {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--text);
-    letter-spacing: -0.5px;
-  }
-
+  body { background: var(--bg); color: var(--text); font-family: 'Noto Sans JP', sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 24px 16px; }
+  .header { text-align: center; margin-bottom: 28px; }
+  .header .tag { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; margin-bottom: 6px; }
+  .header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
   .header h1 span { color: var(--accent2); }
-
-  .progress-bar-wrap {
-    width: 100%;
-    max-width: 680px;
-    margin-bottom: 8px;
-  }
-
-  .progress-info {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    color: var(--text-muted);
-    font-family: 'JetBrains Mono', monospace;
-    margin-bottom: 6px;
-  }
-
-  .progress-bar {
-    height: 4px;
-    background: var(--border);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent2), var(--accent));
-    border-radius: 2px;
-    transition: width 0.4s ease;
-  }
-
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    width: 100%;
-    max-width: 680px;
-    padding: 28px;
-    margin-bottom: 16px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--accent2), var(--accent));
-  }
-
-  .question-meta {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-
-  .question-badge {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--accent2);
-    padding: 3px 10px;
-    border-radius: 20px;
-    letter-spacing: 1px;
-  }
-
-  .multi-badge {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    background: rgba(247,129,102,0.1);
-    border: 1px solid var(--accent);
-    color: var(--accent);
-    padding: 3px 10px;
-    border-radius: 20px;
-  }
-
-  .question-text {
-    font-size: 16px;
-    line-height: 1.7;
-    color: var(--text);
-    margin-bottom: 20px;
-  }
-
-  pre.code-block {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    line-height: 1.7;
-    color: #e6edf3;
-    overflow-x: auto;
-    margin-bottom: 20px;
-    counter-reset: line;
-  }
-
-  pre.code-block .line {
-    display: flex;
-    gap: 16px;
-  }
-
-  pre.code-block .line-num {
-    color: var(--text-muted);
-    user-select: none;
-    min-width: 16px;
-    text-align: right;
-  }
-
-  .options {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .option-btn {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 13px 16px;
-    text-align: left;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    color: var(--text);
-    font-family: 'Noto Sans JP', sans-serif;
-    font-size: 14px;
-    line-height: 1.5;
-  }
-
-  .option-btn:hover:not(:disabled) {
-    border-color: var(--accent2);
-    background: rgba(121,192,255,0.06);
-    transform: translateX(2px);
-  }
-
-  .option-btn .letter {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--accent2);
-    background: rgba(121,192,255,0.1);
-    border-radius: 4px;
-    padding: 2px 7px;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-
-  .option-btn.selected {
-    border-color: var(--accent2);
-    background: rgba(121,192,255,0.1);
-  }
-
-  .option-btn.correct {
-    border-color: var(--correct);
-    background: rgba(63,185,80,0.1);
-  }
-
+  .screen { width: 100%; max-width: 680px; display: none; }
+  .screen.active { display: block; animation: fadeIn 0.3s ease; }
+  .select-title { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px; }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .select-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; cursor: pointer; transition: all 0.15s ease; position: relative; overflow: hidden; }
+  .select-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--accent2), var(--accent)); opacity: 0; transition: opacity 0.15s; }
+  .select-card:hover { border-color: var(--accent2); transform: translateY(-2px); }
+  .select-card:hover::before, .select-card.selected::before { opacity: 1; }
+  .select-card.selected { border-color: var(--accent2); background: rgba(121,192,255,0.06); }
+  .select-card .card-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent2); margin-bottom: 6px; }
+  .select-card .card-title { font-size: 14px; font-weight: 700; }
+  .mock-toggle { display: flex; gap: 8px; margin-bottom: 20px; }
+  .toggle-btn { font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 7px 18px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface2); color: var(--text-muted); cursor: pointer; transition: all 0.15s; }
+  .toggle-btn.active { border-color: var(--accent2); color: var(--accent2); background: rgba(121,192,255,0.08); }
+  .progress-wrap { margin-bottom: 8px; }
+  .progress-info { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-bottom: 6px; }
+  .progress-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); border-radius: 2px; transition: width 0.4s ease; }
+  .quiz-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; margin-bottom: 16px; position: relative; overflow: hidden; }
+  .quiz-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent2), var(--accent)); }
+  .question-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+  .question-badge { font-family: 'JetBrains Mono', monospace; font-size: 11px; background: var(--surface2); border: 1px solid var(--border); color: var(--accent2); padding: 3px 10px; border-radius: 20px; }
+  .multi-badge { font-family: 'JetBrains Mono', monospace; font-size: 11px; background: rgba(247,129,102,0.1); border: 1px solid var(--accent); color: var(--accent); padding: 3px 10px; border-radius: 20px; }
+  .question-text { font-size: 15px; line-height: 1.8; margin-bottom: 20px; }
+  pre.code-block { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.7; overflow-x: auto; margin-bottom: 20px; }
+  pre.code-block .line { display: flex; gap: 14px; }
+  pre.code-block .line-num { color: var(--text-muted); user-select: none; min-width: 18px; text-align: right; flex-shrink: 0; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 13px 16px; text-align: left; cursor: pointer; transition: all 0.15s ease; display: flex; align-items: flex-start; gap: 12px; color: var(--text); font-family: 'Noto Sans JP', sans-serif; font-size: 14px; line-height: 1.5; width: 100%; }
+  .option-btn:hover:not(:disabled) { border-color: var(--accent2); background: rgba(121,192,255,0.06); transform: translateX(2px); }
+  .option-btn .letter { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; color: var(--accent2); background: rgba(121,192,255,0.1); border-radius: 4px; padding: 2px 7px; flex-shrink: 0; margin-top: 1px; }
+  .option-btn.selected { border-color: var(--accent2); background: rgba(121,192,255,0.1); }
+  .option-btn.correct { border-color: var(--correct); background: rgba(63,185,80,0.1); }
   .option-btn.correct .letter { color: var(--correct); background: rgba(63,185,80,0.15); }
-
-  .option-btn.wrong {
-    border-color: var(--wrong);
-    background: rgba(248,81,73,0.08);
-  }
-
+  .option-btn.wrong { border-color: var(--wrong); background: rgba(248,81,73,0.08); }
   .option-btn.wrong .letter { color: var(--wrong); background: rgba(248,81,73,0.15); }
-
   .option-btn:disabled { cursor: default; transform: none; }
-
-  .action-row {
-    display: flex;
-    gap: 12px;
-    justify-content: flex-end;
-    margin-top: 20px;
-  }
-
-  .btn {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    letter-spacing: 0.5px;
-    padding: 10px 22px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    font-weight: 600;
-  }
-
-  .btn-primary {
-    background: linear-gradient(135deg, var(--accent2), #1f6feb);
-    color: #fff;
-  }
-
+  .explanation-box { background: var(--surface2); border: 1px solid var(--border); border-left: 3px solid var(--accent3); border-radius: 8px; padding: 16px; margin-top: 16px; font-size: 14px; line-height: 1.8; color: var(--text-muted); display: none; }
+  .explanation-box.show { display: block; }
+  .explanation-box strong { color: var(--accent3); font-family: 'JetBrains Mono', monospace; }
+  .action-row { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; flex-wrap: wrap; }
+  .btn { font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 10px 22px; border-radius: 8px; border: none; cursor: pointer; transition: all 0.15s ease; font-weight: 600; }
+  .btn-primary { background: linear-gradient(135deg, var(--accent2), #1f6feb); color: #fff; }
   .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
   .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
-
-  .btn-ghost {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text-muted);
-  }
-
+  .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
   .btn-ghost:hover { border-color: var(--accent2); color: var(--accent2); }
-
-  .explanation-box {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--accent3);
-    border-radius: 8px;
-    padding: 16px;
-    margin-top: 16px;
-    font-size: 14px;
-    line-height: 1.8;
-    color: var(--text-muted);
-    display: none;
-  }
-
-  .explanation-box.show { display: block; }
-
-  .explanation-box strong { color: var(--accent3); font-family: 'JetBrains Mono', monospace; }
-
-  .result-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    max-width: 680px;
-    width: 100%;
-    padding: 40px 28px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    display: none;
-  }
-
-  .result-card.show { display: block; }
-
-  .result-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--accent3), var(--accent2));
-  }
-
-  .score-circle {
-    width: 110px;
-    height: 110px;
-    border-radius: 50%;
-    border: 3px solid var(--accent2);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 20px;
-    background: rgba(121,192,255,0.06);
-  }
-
-  .score-number {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 32px;
-    font-weight: 700;
-    color: var(--accent2);
-    line-height: 1;
-  }
-
-  .score-label {
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-top: 4px;
-  }
-
+  .btn-danger { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-size: 12px; padding: 8px 16px; }
+  .btn-danger:hover { border-color: var(--wrong); color: var(--wrong); }
+  .result-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 40px 28px; text-align: center; position: relative; overflow: hidden; }
+  .result-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent3), var(--accent2)); }
+  .score-circle { width: 110px; height: 110px; border-radius: 50%; border: 3px solid var(--accent2); display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 20px; background: rgba(121,192,255,0.06); }
+  .score-number { font-family: 'JetBrains Mono', monospace; font-size: 32px; font-weight: 700; color: var(--accent2); line-height: 1; }
+  .score-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
   .result-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
-  .result-sub { color: var(--text-muted); font-size: 14px; margin-bottom: 24px; }
-
-  .quiz-wrap { width: 100%; max-width: 680px; }
-  .quiz-wrap.hidden { display: none; }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .card, .result-card { animation: fadeIn 0.3s ease; }
+  .result-sub { color: var(--text-muted); font-size: 14px; margin-bottom: 28px; }
+  .result-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .loading-wrap { text-align: center; padding: 40px 0; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; font-size: 14px; }
+  .loading-dot { display: inline-block; animation: blink 1.2s infinite; }
+  .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink { 0%,80%,100%{opacity:0} 40%{opacity:1} }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
 </style>
 </head>
 <body>
-
 <div class="header">
-  <div class="tag">// 3章 練習問題</div>
-  <h1>Java <span>Quiz</span></h1>
+  <div class="tag">// Java Silver</div>
+  <h1>Cert<span>Quiz</span></h1>
 </div>
 
-<div class="quiz-wrap" id="quizWrap">
-  <div class="progress-bar-wrap">
+<div class="screen active" id="screenSelect">
+  <div class="mock-toggle">
+    <button class="toggle-btn active" id="toggleNormal" onclick="switchMode(false)">章ごと</button>
+    <button class="toggle-btn" id="toggleMock" onclick="switchMode(true)">模擬試験</button>
+  </div>
+  <div class="select-title" id="selectTitle">章を選択</div>
+  <div class="card-grid" id="chapterGrid">
+    <div class="loading-wrap">読み込み中<span class="loading-dot">.</span><span class="loading-dot">.</span><span class="loading-dot">.</span></div>
+  </div>
+  <div style="text-align:right">
+    <button class="btn btn-primary" id="startBtn" onclick="startQuiz()" disabled>開始する →</button>
+  </div>
+</div>
+
+<div class="screen" id="screenQuiz">
+  <div class="progress-wrap">
     <div class="progress-info">
-      <span id="progressText">問題 1 / 5</span>
+      <span id="progressText">問題 1 / ?</span>
       <span id="scoreText">正解: 0</span>
     </div>
     <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
   </div>
-
-  <div class="card" id="questionCard">
+  <div class="quiz-card">
     <div class="question-meta">
-      <span class="question-badge" id="questionBadge">問題 3-1</span>
-      <span class="multi-badge" id="multiBadge" style="display:none">2つ選択</span>
+      <span class="question-badge" id="questionBadge">問題</span>
+      <span class="multi-badge" id="multiBadge" style="display:none">複数選択</span>
     </div>
     <div class="question-text" id="questionText"></div>
     <pre class="code-block" id="codeBlock" style="display:none"></pre>
     <div class="options" id="optionsContainer"></div>
     <div class="explanation-box" id="explanationBox"></div>
     <div class="action-row">
+      <button class="btn btn-danger" onclick="backToSelect()">← 戻る</button>
       <button class="btn btn-ghost" id="skipBtn" onclick="nextQuestion()">スキップ</button>
       <button class="btn btn-primary" id="submitBtn" onclick="submitAnswer()" disabled>答える</button>
-      <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" style="display:none">次の問題 →</button>
+      <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" style="display:none">次へ →</button>
     </div>
   </div>
 </div>
 
-<div class="result-card" id="resultCard">
-  <div class="score-circle">
-    <div class="score-number" id="finalScore">0/5</div>
-    <div class="score-label">SCORE</div>
+<div class="screen" id="screenResult">
+  <div class="result-card">
+    <div class="score-circle">
+      <div class="score-number" id="finalScore">0/0</div>
+      <div class="score-label">SCORE</div>
+    </div>
+    <div class="result-title" id="resultTitle">お疲れさまでした！</div>
+    <div class="result-sub" id="resultSub"></div>
+    <div class="result-actions">
+      <button class="btn btn-ghost" onclick="backToSelect()">章選択に戻る</button>
+      <button class="btn btn-primary" onclick="retryQuiz()">もう一度</button>
+    </div>
   </div>
-  <div class="result-title" id="resultTitle">お疲れさまでした！</div>
-  <div class="result-sub" id="resultSub"></div>
-  <button class="btn btn-primary" onclick="restartQuiz()">もう一度挑戦</button>
 </div>
 
 <script>
-const questions = [
-  {
-    id: "3-1",
-    text: "次の記述に関して、コンパイルエラーになるものはどれですか。（2つ選択）",
-    code: null,
-    multi: true,
-    options: [
-      { letter: "A", text: "short a = 11.2;" },
-      { letter: "B", text: "byte b = 100;" },
-      { letter: "C", text: "int c = 'c';" },
-      { letter: "D", text: "double d = 3.5F;" },
-      { letter: "E", text: "long e = 13.0;" },
-      { letter: "F", text: "float f = 200L;" },
-    ],
-    correct: ["A", "E"],
-    explanation: "暗黙の型変換の問題です。byte → short → int → long → float → double の流れで暗黙変換が行われます。A（short に 11.2 はfloat/doubleリテラルで代入不可）、E（long に 13.0 はdoubleリテラルで明示的キャストなしに代入不可）がコンパイルエラーになります。B は byte 範囲内、C は char から int への変換OK、D はfloatをdoubleへOK、F はlongをfloatへOK。"
-  },
-  {
-    id: "3-2",
-    text: "次のプログラムがあります。実行結果を true とするためには、5行目にどのコードを挿入しますか。（1つ選択）",
-    code: `public class Main {
-    public static void main(String[] args) {
-        int a = 10; double b = 2.0;
-        var v = 2 + a / b * 5;
-        // insert code here
-    }
-}`,
-    multi: false,
-    options: [
-      { letter: "A", text: "System.out.println(v == 1.2);" },
-      { letter: "B", text: "System.out.println(v == 30.0);" },
-      { letter: "C", text: "System.out.println(v == 30);" },
-      { letter: "D", text: "System.out.println(v == 27);" },
-    ],
-    correct: ["D"],
-    explanation: "演算の優先度の問題です。① a / b * 5：b は double なので 10 / 2.0 * 5 = 25.0。② 2 + 25.0 = 27.0。v の型は double で値は 27.0。== の左辺が double なので int の 27 は暗黙的に 27.0 となり、v == 27 は true になります。"
-  },
-  {
-    id: "3-3",
-    text: "次のプログラムをコンパイル、実行するとどのような結果になりますか。（1つ選択）",
-    code: `public class Main {
-    public static void main(String[] args) {
-        int x = 5, y = 1;
-        System.out.println(++x + x++ + y++ + ++y);
-    }
-}`,
-    multi: false,
-    options: [
-      { letter: "A", text: "14" },
-      { letter: "B", text: "15" },
-      { letter: "C", text: "16" },
-      { letter: "D", text: "17" },
-    ],
-    correct: ["C"],
-    explanation: "インクリメント演算子の前置・後置の問題です。左から順番に評価：++x → xを先にインクリメントして6を使用（x=6）、x++ → 6を使用してからインクリメント（x=7）、y++ → 1を使用してからインクリメント（y=2）、++y → yを先にインクリメントして3を使用（y=3）。6 + 6 + 1 + 3 = 16。"
-  },
-  {
-    id: "3-4",
-    text: "次のプログラムをコンパイル、実行するとどのような結果になりますか。（1つ選択）",
-    code: `public class Main {
-    public static void main(String[] args) {
-        byte data = 10;
-        int[] array = {data, (int)10.5};
-        System.out.println(array[0] < array[1]);
-    }
-}`,
-    multi: false,
-    options: [
-      { letter: "A", text: "true" },
-      { letter: "B", text: "false" },
-      { letter: "C", text: "10" },
-      { letter: "D", text: "4行目でコンパイルエラーが発生する" },
-    ],
-    correct: ["B"],
-    explanation: "基本データ型の変換と関係演算子の問題です。array[0] は byte の data（10）を int 配列に代入 → 暗黙変換で 10。array[1] は (int)10.5 → 小数点切り捨てで 10。10 < 10 は false になります。コンパイルエラーは発生しません。"
-  },
-  {
-    id: "3-5",
-    text: "次のプログラムをコンパイル、実行するとどのような結果になりますか。（1つ選択）",
-    code: `public class Main {
-    public static void main(String[] args) {
-        int a = 1, b = 9, x = 11, y = 10;
-        int val;
-        val = (y < --x) ? ++a : ++b;
-        System.out.println(val);
-    }
-}`,
-    multi: false,
-    options: [
-      { letter: "A", text: "2" },
-      { letter: "B", text: "10" },
-      { letter: "C", text: "11" },
-      { letter: "D", text: "コンパイルエラー" },
-    ],
-    correct: ["C"],
-    explanation: "インクリメント/デクリメントと三項演算子の問題です。4～5行目の実行後の変数値は a:11, b:9, x:11, y:10。条件式 (y < --x) は --x によりxが先にデクリメントされて x=10 → 10 < 10 は false。false の処理は ++b（b=10）が val に代入されます。答えは 10 ではなく...いや b は 9 なので ++b = 10。正解は B（10）です。解説と画像の正解は C(11) と記載がありましたが、問題文の変数 b=9 より ++b=10 となります。"
-  },
-];
+const SUPABASE_URL = 'https://aqahathdnhbmwvinlmon.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxYWhhdGhkbmhibXd2aW5sbW9uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNjgxMzgsImV4cCI6MjA4ODc0NDEzOH0.jsbFPVX93pqYqcu33Co-Yn_FqGQObISNJA5HuIgZ1YA';
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let currentIndex = 0;
-let score = 0;
-let selectedAnswers = [];
-let answered = false;
+const SESSION_ID = (() => {
+  let id = localStorage.getItem('quiz_session_id');
+  if (!id) { id = 'sess_' + Math.random().toString(36).slice(2); localStorage.setItem('quiz_session_id', id); }
+  return id;
+})();
+
+let chapters = [], questions = [], currentIndex = 0, score = 0;
+let selectedAnswers = [], answered = false, isMockMode = false, selectedChapterId = null;
+
+async function init() {
+  const { data } = await db.from('chapters').select('*').eq('genre_id', 1).eq('is_mock', false).order('chapter_no');
+  chapters = data || [];
+  renderChapterGrid();
+}
+
+function renderChapterGrid() {
+  const grid = document.getElementById('chapterGrid');
+  document.getElementById('selectTitle').textContent = isMockMode ? '模擬試験を選択' : '章を選択';
+  if (!chapters.length) { grid.innerHTML = '<div class="loading-wrap">データがありません</div>'; return; }
+  grid.innerHTML = chapters.map(c => `
+    <div class="select-card" id="chapter-${c.id}" onclick="selectChapter(${c.id})">
+      <div class="card-label">${isMockMode ? 'MOCK' : 'CHAPTER'} ${c.chapter_no}</div>
+      <div class="card-title">${c.title}</div>
+    </div>`).join('');
+}
+
+async function switchMode(mock) {
+  isMockMode = mock;
+  selectedChapterId = null;
+  document.getElementById('startBtn').disabled = true;
+  document.getElementById('toggleNormal').classList.toggle('active', !mock);
+  document.getElementById('toggleMock').classList.toggle('active', mock);
+  const { data } = await db.from('chapters').select('*').eq('genre_id', 1).eq('is_mock', mock).order('chapter_no');
+  chapters = data || [];
+  renderChapterGrid();
+}
+
+function selectChapter(id) {
+  selectedChapterId = id;
+  document.querySelectorAll('.select-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('chapter-' + id).classList.add('selected');
+  document.getElementById('startBtn').disabled = false;
+}
+
+async function startQuiz() {
+  if (!selectedChapterId) return;
+  const { data } = await db.from('questions').select('*').eq('chapter_id', selectedChapterId).order('question_no');
+  if (!data || !data.length) { alert('問題が見つかりませんでした'); return; }
+  questions = data; currentIndex = 0; score = 0;
+  showScreen('screenQuiz'); renderQuestion();
+}
 
 function renderQuestion() {
   const q = questions[currentIndex];
-  answered = false;
-  selectedAnswers = [];
-
-  document.getElementById('progressText').textContent = `問題 ${currentIndex + 1} / ${questions.length}`;
-  document.getElementById('scoreText').textContent = `正解: ${score}`;
-  document.getElementById('progressFill').style.width = `${(currentIndex / questions.length) * 100}%`;
-  document.getElementById('questionBadge').textContent = `問題 ${q.id}`;
+  answered = false; selectedAnswers = [];
+  document.getElementById('progressText').textContent = '問題 ' + (currentIndex+1) + ' / ' + questions.length;
+  document.getElementById('scoreText').textContent = '正解: ' + score;
+  document.getElementById('progressFill').style.width = (currentIndex / questions.length * 100) + '%';
+  document.getElementById('questionBadge').textContent = '問題 ' + q.question_no;
   document.getElementById('multiBadge').style.display = q.multi ? 'inline-block' : 'none';
   document.getElementById('questionText').textContent = q.text;
-
-  const codeBlock = document.getElementById('codeBlock');
+  const cb = document.getElementById('codeBlock');
   if (q.code) {
-    codeBlock.style.display = 'block';
-    const lines = q.code.split('\n');
-    codeBlock.innerHTML = lines.map((l, i) =>
-      `<div class="line"><span class="line-num">${i+1}</span><span>${escHtml(l)}</span></div>`
-    ).join('');
-  } else {
-    codeBlock.style.display = 'none';
-  }
-
-  const container = document.getElementById('optionsContainer');
-  container.innerHTML = q.options.map(opt => `
-    <button class="option-btn" id="opt-${opt.letter}" onclick="selectOption('${opt.letter}')">
-      <span class="letter">${opt.letter}</span>
-      <span>${escHtml(opt.text)}</span>
-    </button>
-  `).join('');
-
+    cb.style.display = 'block';
+    cb.innerHTML = q.code.split('\n').map((l,i) => '<div class="line"><span class="line-num">'+(i+1)+'</span><span>'+escHtml(l)+'</span></div>').join('');
+  } else { cb.style.display = 'none'; }
+  document.getElementById('optionsContainer').innerHTML = q.options.map(o =>
+    '<button class="option-btn" id="opt-'+o.letter+'" onclick="selectOption(\''+o.letter+'\')"><span class="letter">'+o.letter+'</span><span>'+escHtml(o.text)+'</span></button>'
+  ).join('');
   document.getElementById('explanationBox').className = 'explanation-box';
   document.getElementById('explanationBox').innerHTML = '';
   document.getElementById('submitBtn').style.display = 'inline-block';
@@ -531,97 +226,65 @@ function renderQuestion() {
   document.getElementById('skipBtn').style.display = 'inline-block';
 }
 
-function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
 function selectOption(letter) {
   if (answered) return;
   const q = questions[currentIndex];
-
   if (q.multi) {
     const idx = selectedAnswers.indexOf(letter);
-    if (idx >= 0) {
-      selectedAnswers.splice(idx, 1);
-      document.getElementById(`opt-${letter}`).classList.remove('selected');
-    } else {
-      selectedAnswers.push(letter);
-      document.getElementById(`opt-${letter}`).classList.add('selected');
-    }
+    if (idx >= 0) { selectedAnswers.splice(idx,1); document.getElementById('opt-'+letter).classList.remove('selected'); }
+    else { selectedAnswers.push(letter); document.getElementById('opt-'+letter).classList.add('selected'); }
     document.getElementById('submitBtn').disabled = selectedAnswers.length === 0;
   } else {
     selectedAnswers = [letter];
-    q.options.forEach(o => document.getElementById(`opt-${o.letter}`).classList.remove('selected'));
-    document.getElementById(`opt-${letter}`).classList.add('selected');
+    q.options.forEach(o => document.getElementById('opt-'+o.letter).classList.remove('selected'));
+    document.getElementById('opt-'+letter).classList.add('selected');
     document.getElementById('submitBtn').disabled = false;
   }
 }
 
-function submitAnswer() {
+async function submitAnswer() {
   if (answered) return;
   answered = true;
   const q = questions[currentIndex];
-
-  const isCorrect = q.correct.length === selectedAnswers.length &&
-    q.correct.every(c => selectedAnswers.includes(c));
-
+  const isCorrect = q.correct.length === selectedAnswers.length && q.correct.every(c => selectedAnswers.includes(c));
   if (isCorrect) score++;
-
   q.options.forEach(opt => {
-    const btn = document.getElementById(`opt-${opt.letter}`);
+    const btn = document.getElementById('opt-'+opt.letter);
     btn.disabled = true;
-    if (q.correct.includes(opt.letter)) {
-      btn.classList.add('correct');
-    } else if (selectedAnswers.includes(opt.letter)) {
-      btn.classList.add('wrong');
-    }
+    if (q.correct.includes(opt.letter)) btn.classList.add('correct');
+    else if (selectedAnswers.includes(opt.letter)) btn.classList.add('wrong');
   });
-
-  const expBox = document.getElementById('explanationBox');
-  expBox.innerHTML = `<strong>正解: ${q.correct.join('・')}</strong><br><br>${q.explanation}`;
-  expBox.classList.add('show');
-
+  const exp = document.getElementById('explanationBox');
+  exp.innerHTML = '<strong>正解: ' + q.correct.join('・') + '</strong><br><br>' + q.explanation;
+  exp.classList.add('show');
   document.getElementById('submitBtn').style.display = 'none';
   document.getElementById('skipBtn').style.display = 'none';
   document.getElementById('nextBtn').style.display = 'inline-block';
-  document.getElementById('scoreText').textContent = `正解: ${score}`;
+  document.getElementById('scoreText').textContent = '正解: ' + score;
+  await db.from('answer_history').insert({ question_id: q.id, session_id: SESSION_ID, selected: selectedAnswers, is_correct: isCorrect });
 }
 
 function nextQuestion() {
   currentIndex++;
-  if (currentIndex >= questions.length) {
-    showResult();
-  } else {
-    renderQuestion();
-  }
+  if (currentIndex >= questions.length) showResult(); else renderQuestion();
 }
 
 function showResult() {
-  document.getElementById('quizWrap').classList.add('hidden');
-  const r = document.getElementById('resultCard');
-  r.classList.add('show');
-  document.getElementById('finalScore').textContent = `${score}/${questions.length}`;
-  const pct = Math.round((score / questions.length) * 100);
-  let title, sub;
-  if (pct === 100) { title = '完璧です！🎉'; sub = '全問正解！素晴らしい理解度です。'; }
-  else if (pct >= 80) { title = 'よくできました！'; sub = `${pct}% 正解。あと少しで完璧です！`; }
-  else if (pct >= 60) { title = 'もう少し！'; sub = `${pct}% 正解。苦手な部分を復習しましょう。`; }
-  else { title = '復習しましょう'; sub = `${pct}% 正解。もう一度チャレンジ！`; }
+  showScreen('screenResult');
+  document.getElementById('finalScore').textContent = score + '/' + questions.length;
+  const pct = Math.round(score / questions.length * 100);
+  const msgs = [[100,'完璧です！🎉','全問正解！素晴らしい理解度です。'],[80,'よくできました！',pct+'% 正解。あと少しで完璧です！'],[60,'もう少し！',pct+'% 正解。苦手な部分を復習しましょう。'],[0,'復習しましょう',pct+'% 正解。もう一度チャレンジ！']];
+  const [,title,sub] = msgs.find(([t]) => pct >= t);
   document.getElementById('resultTitle').textContent = title;
   document.getElementById('resultSub').textContent = sub;
 }
 
-function restartQuiz() {
-  currentIndex = 0;
-  score = 0;
-  selectedAnswers = [];
-  answered = false;
-  document.getElementById('resultCard').classList.remove('show');
-  document.getElementById('quizWrap').classList.remove('hidden');
-  renderQuestion();
-}
+function retryQuiz() { currentIndex = 0; score = 0; showScreen('screenQuiz'); renderQuestion(); }
+function backToSelect() { selectedChapterId = null; document.getElementById('startBtn').disabled = true; document.querySelectorAll('.select-card').forEach(c => c.classList.remove('selected')); showScreen('screenSelect'); }
+function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-renderQuestion();
+init();
 </script>
 </body>
 </html>
